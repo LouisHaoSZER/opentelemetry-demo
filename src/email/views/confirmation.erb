@@ -41,7 +41,7 @@
           <th>Quantity</th>
           <th>Price</th>
         </tr>
-        <% order.items.each do |item| %>
+        <% (order.items || []).each do |item| %>
           <tr>
             <td><%= item.item.product_id %></td>
             <td><%= item.item.quantity %></td>

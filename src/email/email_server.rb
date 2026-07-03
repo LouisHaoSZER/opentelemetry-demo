@@ -67,6 +67,7 @@ def send_email(data)
     memory_leak_multiplier = client.fetch_number_value(flag_key: "emailMemoryLeak", default_value: 0)
 
     # To speed up the memory leak we create a long email body
+    data.order.items ||= []  # ensure items is an array (Go omitempty may drop it from JSON)
     confirmation_content = erb(:confirmation, locals: { order: data.order })
     whitespace_length = [0, confirmation_content.length * (memory_leak_multiplier-1)].max
 
