@@ -1,0 +1,28 @@
+# Git 元数据 / 平台元数据
+**/.git
+**/.gitignore
+**/.DS_Store
+
+# Python 副产物
+**/__pycache__
+**/*.pyc
+**/*.pyo
+**/*.pyd
+**/.venv
+**/venv
+
+# Node 副产物 (理论上 load-generator 不该有, 兜底)
+**/node_modules
+
+# 仓库内的诊断 / 输出目录
+**/diagnostics
+_dist/
+
+# 文档与本地工具 - 不要进 image, 减体积 + 减攻击面
+README.md
+build-and-export.sh
+run-local.sh
+mypy.ini
+
+# debug 目录 (历史): 本地 docker compose 调试栈, 不入镜像
+debug/

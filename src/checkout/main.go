@@ -469,12 +469,15 @@ func mustCreateClient(svcAddr string) *grpc.ClientConn {
 }
 
 func (cs *checkout) quoteShipping(ctx context.Context, address *pb.Address, items []*pb.CartItem) (*pb.Money, error) {
+	if items == nil {
+		items = []*pb.CartItem{}
+	}
 	quotePayload, err := json.Marshal(map[string]interface{}{
 		"address": address,
 		"items":   items,
 	})
 	if err != nil {
-		return nil, fmt.Errorf("failed to marshal ship order request: %+v", err)
+		return nil, fmt.Errorf("failed to marshal shipping quote request: %+v", err)
 	}
 
 	req, err := http.NewRequestWithContext(ctx, "POST", cs.shippingSvcAddr+"/get-quote", bytes.NewBuffer(quotePayload))
@@ -489,7 +492,7 @@ func (cs *checkout) quoteShipping(ctx context.Context, address *pb.Address, item
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("failed POST to email service: expected 200, got %d", resp.StatusCode)
+		return nil, fmt.Errorf("failed POST to shipping service: expected 200, got %d", resp.StatusCode)
 	}
 
 	shippingQuoteBytes, err := io.ReadAll(resp.Body)
@@ -602,6 +605,9 @@ func (cs *checkout) sendOrderConfirmation(ctx context.Context, email string, ord
 }
 
 func (cs *checkout) shipOrder(ctx context.Context, address *pb.Address, items []*pb.CartItem) (string, error) {
+	if items == nil {
+		items = []*pb.CartItem{}
+	}
 	shipPayload, err := json.Marshal(map[string]interface{}{
 		"address": address,
 		"items":   items,
@@ -622,7 +628,7 @@ func (cs *checkout) shipOrder(ctx context.Context, address *pb.Address, items []
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return "", fmt.Errorf("failed POST to email service: expected 200, got %d", resp.StatusCode)
+		return "", fmt.Errorf("failed POST to shipping service: expected 200, got %d", resp.StatusCode)
 	}
 
 	trackingRespBytes, err := io.ReadAll(resp.Body)
