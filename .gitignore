@@ -40,6 +40,7 @@ composer.lock
 .ghcr.env
 *.apk
 /.lycheecache
+_dist/
 
 # Ignore copied/generated protobuf files
 /src/accounting/src/protos/

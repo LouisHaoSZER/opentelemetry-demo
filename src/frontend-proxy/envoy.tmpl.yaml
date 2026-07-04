@@ -14,6 +14,8 @@ static_resources:
                 "@type": type.googleapis.com/envoy.extensions.filters.network.http_connection_manager.v3.HttpConnectionManager
                 codec_type: AUTO
                 stat_prefix: ingress_http
+                common_http_protocol_options:
+                  idle_timeout: 60s
                 tracing:
                   spawn_upstream_span: true
                   provider:
@@ -89,7 +91,9 @@ static_resources:
                             upgrade_configs:
                               - upgrade_type: websocket
                         - match: { prefix: "/" }  # Default/catch-all route - keep last since prefix:"/" matches everything
-                          route: { cluster: frontend }
+                          route:
+                            cluster: frontend
+                            timeout: 10s
                 http_filters:
                   - name: envoy.filters.http.fault
                     typed_config:
@@ -196,6 +200,22 @@ static_resources:
       type: STRICT_DNS
       lb_policy: ROUND_ROBIN
       typed_dns_resolver_config: *dns_resolver
+      connect_timeout: 3s
+      circuit_breakers:
+        thresholds:
+          - priority: DEFAULT
+            max_connections: 4096
+            max_pending_requests: 4096
+            max_requests: 8192
+            max_retries: 3
+      typed_extension_protocol_options:
+        envoy.extensions.upstreams.http.v3.HttpProtocolOptions:
+          "@type": type.googleapis.com/envoy.extensions.upstreams.http.v3.HttpProtocolOptions
+          explicit_http_config:
+            http_protocol_options:
+              max_requests_per_connection: 10000
+          common_http_protocol_options:
+            idle_timeout: 300s
       load_assignment:
         cluster_name: frontend
         endpoints:
