@@ -540,6 +540,17 @@ func (cs *checkout) prepOrderItems(ctx context.Context, items []*pb.CartItem, us
 		if err != nil {
 			return nil, fmt.Errorf("failed to convert price of %q to %s", item.GetProductId(), userCurrency)
 		}
+
+		if price == nil {
+			return nil, fmt.Errorf("failed to convert price of %q to %s: currency service returned nil", item.GetProductId(), userCurrency)
+		}
+
+		logger.LogAttrs(ctx, slog.LevelInfo,
+			"order item price processed",
+			slog.String("product_id", item.GetProductId()),
+			slog.Int64("price_nanos", int64(price.Nanos)),
+		)
+
 		out[i] = &pb.OrderItem{
 			Item: item,
 			Cost: price,
